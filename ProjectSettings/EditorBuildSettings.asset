@@ -9,9 +9,12 @@ EditorBuildSettings:
     path: Assets/Rhaldon/Scenes/RhaldonScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 0
-    path: Assets/Rhaldon/Menu/MenuScene.unity
-    guid: c5a336164ccdbd04181da18cb93b7a9a
-  - enabled: 1
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
     path: Assets/All-in-one/Main Menu/MenuForProject.unity
     guid: 3d8bab88c1899b547929b20329c44138
+  - enabled: 1
+    path: Assets/Main Menu/MenuForProject.unity
+    guid: c1123ddd7867aea4ea32a59a77194d54
   m_configObjects: {}
