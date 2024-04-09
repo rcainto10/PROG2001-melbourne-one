@@ -65,9 +65,18 @@ public class PlayerMovement : MonoBehaviour
             {
                 transform.localEulerAngles = new Vector3(0f, 180f, 0f);
             }
-            else if (Input.GetKeyDown(KeyCode.W)) {
+            else if (Input.GetKeyDown(KeyCode.W))
+            {
                 transform.localEulerAngles = new Vector3(0f, 0f, 0f);
             }
+            else if (Input.GetKeyDown(KeyCode.A)) {
+                transform.localEulerAngles = new Vector3(0f, -90f, 0f);
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                transform.localEulerAngles = new Vector3(0f, 90f, 0f);
+            }
+
             anim.SetBool("isMoving", true);
             // Play footstep sfx
             footStep();
