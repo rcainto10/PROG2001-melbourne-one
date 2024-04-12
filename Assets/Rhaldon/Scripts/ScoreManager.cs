@@ -18,7 +18,9 @@ public class ScoreManager : MonoBehaviour
     // Variables
     int gem = 0;
     int gemMax = 8;
-    
+
+    // Victory Sound Clip obj
+    [SerializeField] private AudioClip victorySoundClip;
 
     //Awake is called when the script gets instantiated. Meaning even before the Start method, this method will execute first.
     private void Awake()
@@ -50,12 +52,14 @@ public class ScoreManager : MonoBehaviour
     /**
      * Max Score Function
      * When the amount of gem collected meets the total gem requiment
-     * Activate the victory screen panel
+     * Activate the victory screen panel, play victory sound,
      * and freeze the game
      */
     public void MaxScore() {
         if (gem == gemMax) {
             victoryScreen.gameObject.SetActive(true);
+            // Play victory sound
+            AudioManager.Instance.PlayVoiceOver(victorySoundClip);
             //Freezes game-time when in Victory Screen
             Time.timeScale = 0.0f;
         }
