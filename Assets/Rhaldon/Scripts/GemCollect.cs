@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class GemCollect : MonoBehaviour
 {
+    // Variables
+    // To determine if the gem should be destroyed
     [SerializeField] private bool destroyObj;
+    // Reference to the gem GameObject
     [SerializeField] GameObject gem;
 
     // Gem Sound Clip obj
@@ -14,18 +17,20 @@ public class GemCollect : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        // Initialize destroyObj to true
         destroyObj = true;
-        
     }
-    // Update is called once per frame
+
+    // FixedUpdate is called once per physics frame
     void FixedUpdate()
     {
-        //Evaluates whether bool is false and the Game object is tagged 'Coin'
+        // Evaluates whether destroyObj is false and there is a GameObject tagged 'Gem'
         if (destroyObj == false && GameObject.FindGameObjectWithTag("Gem"))
         {
             //Refer to ScoreManager script.
             ScoreManager.instance.AddScore();
             
+            // Play sound clip
             AudioManager.Instance.PlayVoiceOver(gemSoundClip);
 
             
@@ -33,6 +38,7 @@ public class GemCollect : MonoBehaviour
             //2nd argument "0f" dictates the time of execution
             Destroy(gem, 0f);
 
+            // Invoke MaxScore() function
             ScoreManager.instance.MaxScore();
         }
 
@@ -43,12 +49,12 @@ public class GemCollect : MonoBehaviour
     //OnTrigger is utilized, so physics won't come to play when Player obj interacts with this game obj.
     private void OnTriggerEnter(Collider other)
     {
+        // Check if the collider belongs to an object tagged as 'Player'
         if (other.gameObject.CompareTag("Player"))
         {
+            // Set destroyObj to false, allowing the gem to be destroyed in FixedUpdate
             destroyObj = false;
-            
         }
-        
         
     }
 
