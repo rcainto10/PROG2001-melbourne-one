@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Ahmed/ADG_Textures/Demo/DemoScene.unity
     guid: 811f29d220dc6414abce2c554cc1078e
+  - enabled: 1
+    path: Assets/Main Menu/CreditsScene.unity
+    guid: 2ad0fc4918a5e474c8e5786fbf7fd455
   m_configObjects: {}
