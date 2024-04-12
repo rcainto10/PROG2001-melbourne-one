@@ -9,4 +9,9 @@ public class NavControl : MonoBehaviour
     {
         SceneManager.LoadScene(sceneName);
     }
+
+    public void PlayAgain() {
+        SceneManager.LoadScene("RhaldonScene");
+        Time.timeScale = 1.0f;
+    }
 }

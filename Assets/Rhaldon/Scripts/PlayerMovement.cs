@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 // Youtube Movement Guide Reference: https://www.youtube.com/watch?v=iHzAwGg--LM
@@ -8,10 +9,14 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    
     // Variables
     CharacterController controller;
     Vector2 movement;
     [SerializeField] float moveSpeed;
+
+    // ScoreManger
+    ScoreManager scoreManager;
 
     //Jump
     Vector3 velocity;
@@ -22,7 +27,6 @@ public class PlayerMovement : MonoBehaviour
     //Animation
     private Animator anim;
 
-    // Sound
     // Footstep
     public GameObject footsteps;
 
@@ -102,5 +106,7 @@ public class PlayerMovement : MonoBehaviour
     void stopFootStep() {
         footsteps.SetActive(false);
     }
-  
+
+   
+    
 }
