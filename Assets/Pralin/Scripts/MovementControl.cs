@@ -15,7 +15,7 @@ public class MovementControl : MonoBehaviour
     private bool isGrounded;
 
     // Animation
-    private Animator animator;
+    //private Animator animator;
 
     // Sound
     // Footsteps
@@ -24,7 +24,7 @@ public class MovementControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        animator = GetComponent<Animator>();
+        //animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         footstepSound.SetActive(false);
     }
@@ -65,14 +65,14 @@ public class MovementControl : MonoBehaviour
             {
                 transform.localEulerAngles = Vector3.zero;
             }
-            animator.SetBool("isMoving", true);
+            //animator.SetBool("isMoving", true);
             // Play footstep sound
             PlayFootstepSound();
         }
         else
         {
             // Disable moving animation
-            animator.SetBool("isMoving", false);
+            //animator.SetBool("isMoving", false);
             // Stop footstep sound
             StopFootstepSound();
         }
