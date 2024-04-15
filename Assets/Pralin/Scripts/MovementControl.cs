@@ -6,6 +6,8 @@ public class MovementControl : MonoBehaviour
     // Variables
     private CharacterController characterController;
     private Vector2 movementInput;
+    private Vector3 movementDirection; // Declare movementDirection here
+
     [SerializeField] private float moveSpeed;
 
     // Jump
@@ -13,6 +15,8 @@ public class MovementControl : MonoBehaviour
     [SerializeField] private float jumpHeight;
     [SerializeField] private float gravity;
     private bool isGrounded;
+
+    [SerializeField] private Transform cameraTransform;
 
     // Animation
     //private Animator animator;
@@ -27,6 +31,8 @@ public class MovementControl : MonoBehaviour
         //animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         footstepSound.SetActive(false);
+        // Releases the cursor
+        Cursor.lockState = CursorLockMode.None;
     }
 
     // Update is called once per frame
@@ -41,7 +47,10 @@ public class MovementControl : MonoBehaviour
         }
 
         movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        Vector3 movementDirection = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
+        movementDirection = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
+
+        // Rotate movementDirection based on camera rotation
+        movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
 
         if (movementDirection.magnitude >= 0.1f)
         {
@@ -93,5 +102,25 @@ public class MovementControl : MonoBehaviour
     {
         footstepSound.SetActive(false);
     }
-}
 
+    private void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            Cursor.lockState = CursorLockMode.Locked; // Corrected typo here
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None; // Corrected typo here
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Coin")
+        {
+            //Destroy(other.gameObject);
+            ScoreImplementer.scoreCount += 1;
+        }
+    }
+}
