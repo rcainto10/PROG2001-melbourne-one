@@ -4,57 +4,76 @@ using UnityEngine;
 public class MovementControl : MonoBehaviour
 {
     // Variables
-    private CharacterController characterController;
-    private Vector2 movementInput;
-    private Vector3 movementDirection; // Declare movementDirection here
+    private CharacterController characterController;   // Reference to the CharacterController component
+    private Vector2 movementInput;                     // Player's movement input (horizontal and vertical)
+    private Vector3 movementDirection;                 // Direction of movement
 
-    [SerializeField] private float moveSpeed;
+    [SerializeField] private float moveSpeed;         // Movement speed
 
     // Jump
-    private Vector3 velocity;
-    [SerializeField] private float jumpHeight;
-    [SerializeField] private float gravity;
-    private bool isGrounded;
+    private Vector3 velocity;                          // Player's velocity
+    [SerializeField] private float jumpHeight;        // Jump height
+    [SerializeField] private float gravity;           // Gravity force
+    private bool isGrounded;                           // Flag to check if the player is grounded
 
-    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Transform cameraTransform; // Reference to the camera's transform
+    [SerializeField] private AudioClip coinCollectSound; // Sound clip for coin collection
+    [SerializeField] private AudioClip footstepSound; // Footstep sound clip
 
-    // Animation
-    //private Animator animator;
-
-    // Sound
-    // Footsteps
-    public GameObject footstepSound;
+    private AudioSource audioSource; // Reference to the AudioSource component
 
     // Start is called before the first frame update
     void Start()
     {
-        //animator = GetComponent<Animator>();
+        // Get the CharacterController component attached to this GameObject
         characterController = GetComponent<CharacterController>();
-        footstepSound.SetActive(false);
-        // Releases the cursor
+
+        // Add an AudioSource component to this GameObject and configure it
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.loop = true; // Set loop to true for continuous playback
+        audioSource.clip = footstepSound; // Assign footstep sound clip
+
+        // Set cursor lock state
         Cursor.lockState = CursorLockMode.None;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Checking if player is grounded
+        // Check if the player is grounded
         isGrounded = Physics.CheckSphere(transform.position, 0.1f, LayerMask.GetMask("Ground"));
 
+        // If the player is grounded and moving downward, reset the vertical velocity to avoid falling through the ground
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -1f;
         }
 
+        // Get player's movement input
         movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        movementDirection = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
 
-        // Rotate movementDirection based on camera rotation
+        // Calculate movement direction based on input and camera rotation
+        movementDirection = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
         movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
 
+        // Move the player
         if (movementDirection.magnitude >= 0.1f)
         {
             characterController.Move(movementDirection * moveSpeed * Time.deltaTime);
+            
+            // Play footstep sound if not already playing
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            }
+        }
+        else
+        {
+            // Stop footstep sound if player is not moving
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
         }
 
         // Jumping
@@ -63,64 +82,49 @@ public class MovementControl : MonoBehaviour
             velocity.y = Mathf.Sqrt(jumpHeight * -4f * gravity);
         }
 
-        // Running Animation/Sound
-        if (movementDirection != Vector3.zero)
-        {
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                transform.localEulerAngles = new Vector3(0f, 180f, 0f);
-            }
-            else if (Input.GetKeyDown(KeyCode.W))
-            {
-                transform.localEulerAngles = Vector3.zero;
-            }
-            //animator.SetBool("isMoving", true);
-            // Play footstep sound
-            PlayFootstepSound();
-        }
-        else
-        {
-            // Disable moving animation
-            //animator.SetBool("isMoving", false);
-            // Stop footstep sound
-            StopFootstepSound();
-        }
-
+        // Apply gravity to the player
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
     }
 
-    // Footstep functions
-    // Enable footstep sound function
-    void PlayFootstepSound()
-    {
-        footstepSound.SetActive(true);
-    }
-
-    // Disable footstep sound
-    void StopFootstepSound()
-    {
-        footstepSound.SetActive(false);
-    }
-
+    // Handle cursor lock state when application focus changes
     private void OnApplicationFocus(bool focus)
     {
         if (focus)
         {
-            Cursor.lockState = CursorLockMode.Locked; // Corrected typo here
+            Cursor.lockState = CursorLockMode.Locked;
         }
         else
         {
-            Cursor.lockState = CursorLockMode.None; // Corrected typo here
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 
+    // Handle trigger collisions
     private void OnTriggerEnter(Collider other)
     {
+        // Check if the collided object is a coin
         if (other.gameObject.tag == "Coin")
         {
-            //Destroy(other.gameObject);
+            // Play coin collection sound
+            PlaySound(coinCollectSound);
+
+            // Increment score count
             ScoreImplementer.scoreCount += 1;
+
+            // Destroy the coin object
+            Destroy(other.gameObject);
+        }
+    }
+
+    // Method to play a sound clip
+    void PlaySound(AudioClip clip)
+    {
+        // Check if the sound clip is assigned
+        if (clip != null)
+        {
+            // Play the sound clip
+            audioSource.PlayOneShot(clip);
         }
     }
 }
