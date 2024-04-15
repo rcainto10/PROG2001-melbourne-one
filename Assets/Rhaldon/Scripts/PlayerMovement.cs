@@ -4,129 +4,135 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
-// Youtube Movement Guide Reference: https://www.youtube.com/watch?v=iHzAwGg--LM
-// Rotate Guide: https://www.youtube.com/watch?v=LnQudtIKfnw
+// References:
+// Movement Guide: https://www.youtube.com/watch?v=iHzAwGg--LM
+// Rotation Guide: https://www.youtube.com/watch?v=LnQudtIKfnw
 
 public class PlayerMovement : MonoBehaviour
 {
-
-    // Variables
-    // Reference to the CharacterController component for controlling player movement.
+    // Reference to the CharacterController used to enable physical player movement.
     CharacterController controller;
-    // Stores the input values for player movement.
-    Vector2 movement;
-    // Movement speed of the player, editable in the Unity Inspector.
+
+    // Stores the raw input values for player's horizontal and vertical movement.
+    Vector2 movementInput;
+
+    // Vector3 to hold and calculate the direction of player movement.
+    private Vector3 movementDirection;
+
+    // Movement speed of the player, adjustable in the Unity Inspector for easy tuning.
     [SerializeField] float moveSpeed;
 
-    // Reference to the ScoreManager component
+    // Reference to the ScoreManager component for managing game scoring.
     ScoreManager scoreManager;
 
-    // Used for applying gravity and jump calculations.
+    // Vector3 used for calculating the effects of gravity and jump physics.
     Vector3 velocity;
-    // Jump height, editable in the Unity Inspector.
+
+    // Jump height, adjustable in the Unity Inspector to fine-tune jump dynamics.
     [SerializeField] float jumpHeight;
-    // Gravity value to apply to the velocity, editable in the Unity Inspector.
+
+    // Gravity value, editable in Unity Inspector to adjust the gravitational pull on the player.
     [SerializeField] float gravity;
-    // Boolean flag to check if the player is on the ground.
+
+    // Boolean to check if the player is touching the ground.
     [SerializeField] bool isGrounded;
 
-    // Animator component reference for handling animations.
+    // Animator component for handling player animations.
     private Animator anim;
 
-    // GameObject reference for enabling/disabling footstep sounds.
+    // GameObject that controls the footstep sounds.
     public GameObject footsteps;
 
-    // Start is called before the first frame update
+    // Camera Transform to align movement direction with camera's orientation.
+    [SerializeField] private Transform cameraTransform;
+
+    // Start is called before the first frame update.
     void Start()
     {
-        // Initialize animator and controller by getting the components from the game object.
+        // Retrieve the Animator and CharacterController components from the GameObject.
         anim = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
 
-        // Initially disable footsteps to prevent them from playing.
+        // Footsteps audio is initially disabled to avoid playing sounds when not moving.
         footsteps.SetActive(false);
+
+        // Releases the cursor
+        Cursor.lockState = CursorLockMode.None;
     }
 
-    // Update is called once per frame
+    // Update is called once per frame.
     void Update()
     {
-        // Checking if player is grounded
+        // Check if player is on the ground by checking collision with the ground layer.
         isGrounded = Physics.CheckSphere(transform.position, .1f, 1);
 
-        // Reset vertical velocity when grounded.
-        if (isGrounded && velocity.y < 0) {
+        // Reset the vertical velocity when the player is grounded to stop falling motion.
+        if (isGrounded && velocity.y < 0)
+        {
             velocity.y = -1;
         }
 
-        // Read player input and convert it into movement direction.
-        movement = new Vector2 (Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        // Normalized is used to avoid player sprinting in a diagonal direction.
-        Vector3 direction = new Vector3(movement.x, 0, movement.y).normalized;
+        // Capture player input and convert it into a movement direction vector.
+        movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        // Normalize to prevent faster diagonal movement.
+        movementDirection = new Vector3(movementInput.x, 0f, movementInput.y).normalized;
+
+        // Adjust movement direction based on the camera's current rotation.
+        movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
 
         // Move the player using the CharacterController.
-        if (direction.magnitude >= 0.1f) {
-            controller.Move(direction * moveSpeed * Time.deltaTime);
-        }
-
-        // Jumping
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded) {
-            velocity.y = Mathf.Sqrt((jumpHeight * 10) * -2f * gravity);
-        }
-
-        // Rotate the player based on movement direction and play running animations/sounds.
-        if (direction != Vector3.zero)
+        if (movementDirection.magnitude >= 0.1f)
         {
-            // Set rotation of the player based on directional input.
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                transform.localEulerAngles = new Vector3(0f, 180f, 0f);
-            }
-            else if (Input.GetKeyDown(KeyCode.W))
-            {
-                transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-            }
-            else if (Input.GetKeyDown(KeyCode.A)) {
-                transform.localEulerAngles = new Vector3(0f, -90f, 0f);
-            }
-            else if (Input.GetKeyDown(KeyCode.D))
-            {
-                transform.localEulerAngles = new Vector3(0f, 90f, 0f);
-            }
+            controller.Move(movementDirection * moveSpeed * Time.deltaTime);
+        }
 
-            // Activate the moving animation.
+        // Process jumping input and physics.
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * 10 * -2f * gravity);
+        }
+
+        // Handle player rotation and animation states.
+        if (movementDirection != Vector3.zero)
+        {
+            // Play running animation and activate footstep sounds.
             anim.SetBool("isMoving", true);
-
-            // Activate footstep sound effects.
             FootStep();
         }
-        else {
-            // Disable Moving animaion
+        else
+        {
+            // Stop running animation and footstep sounds when movement ceases.
             anim.SetBool("isMoving", false);
-            // Disable Footsteps sound effects
             StopFootStep();
         }
 
-        // Apply gravity to the velocity and move the player.
-        velocity.y += (gravity * 10) * Time.deltaTime;
+        // Apply gravity to the player's vertical velocity and move the player.
+        velocity.y += gravity * 10 * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
 
-    /**
-     * FootStep Function
-     * Enable footsteps sound effects
-     */
-    void FootStep() { 
+    // Enable footstep sound effects.
+    void FootStep()
+    {
         footsteps.SetActive(true);
     }
 
-    /**
-     * StopFootStep Function
-     * Disable Footstep sound effects
-     */
-    void StopFootStep() {
+    // Disable footstep sound effects.
+    void StopFootStep()
+    {
         footsteps.SetActive(false);
     }
 
-   
-    
+    // Manage the cursor locking state based on application focus.
+    private void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
+    }
 }
