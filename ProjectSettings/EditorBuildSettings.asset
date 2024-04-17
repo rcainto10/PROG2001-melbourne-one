@@ -24,6 +24,9 @@ EditorBuildSettings:
     path: Assets/Main Menu/CreditsScene.unity
     guid: 2ad0fc4918a5e474c8e5786fbf7fd455
   - enabled: 1
-    path: Assets/Ahmed/Ahmeds Scene.unity
+    path: Assets/Ahmed/AhmedScene.unity
     guid: ec49a26570e77cd4d838e164cf52810b
+  - enabled: 1
+    path: Assets/Minh/Scenes/Stage 1.unity
+    guid: 464133d010c6bf349b4c4517ffedf5eb
   m_configObjects: {}
